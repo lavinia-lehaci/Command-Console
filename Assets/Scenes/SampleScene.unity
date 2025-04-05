@@ -442,6 +442,40 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - name: print_warning
+    description: printing a waning
+    function:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 548968038}
+          m_TargetAssemblyTypeName: CommandController, Assembly-CSharp
+          m_MethodName: PrintWarning
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - name: print_error
+    description: printing an error
+    function:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 548968038}
+          m_TargetAssemblyTypeName: CommandController, Assembly-CSharp
+          m_MethodName: PrintError
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!4 &548968039
 Transform:
   m_ObjectHideFlags: 0

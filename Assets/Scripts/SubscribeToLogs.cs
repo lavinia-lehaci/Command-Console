@@ -28,11 +28,15 @@ public class SubscribeToLogs : MonoBehaviour
         if (commandController == null)
             return;
 
-        commandController.AddLog($"[{type}] {logString}");
+        string timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        string logMessage = $"[{timestamp}] [{type}] {logString}";
 
         if (type == LogType.Error || type == LogType.Exception)
         {
-            commandController.AddLog($"Stack Trace: {stackTrace}");
+            logMessage += $"\nStack Trace: {stackTrace}";
         }
+
+        commandController.AddLog(logMessage);
     }
 }

@@ -61,7 +61,7 @@ public class CommandController : MonoBehaviour
 
     public void PrintWithArgs(string args)
     {
-        string print = "Printing with args: ";
+        string print = "";
         for(int i = 1; i < args.Split(' ').Length; i++)
         {
             print += args.Split(' ')[i] + " ";
@@ -71,7 +71,12 @@ public class CommandController : MonoBehaviour
 
     public void PrintNoArgs()
     {
-        Debug.LogWarning("Printing with no args");
+        Debug.Log("Simple print, no args.");
+    }
+
+    public void PrintWarning()
+    {
+        Debug.LogWarning("A warning assigned to this transform!", transform);
     }
 
     public void AddLog(string str)
@@ -94,11 +99,16 @@ public class CommandController : MonoBehaviour
             _scroll, 
             new Rect(0f, 0f, Screen.width * 0.9f, 20 * _consoleHistory.Count));
 
+
+        GUIStyle wrappedStyle = new GUIStyle(GUI.skin.label);
+        wrappedStyle.wordWrap = true; 
+        
         if(_consoleHistory.Count > 0)
         {
             for(int i = 0; i < _consoleHistory.Count; i++)
             {
-                GUI.Label(new Rect(Screen.width * 0.01f, 20 * i, Screen.width * 0.8f, 20), _consoleHistory[i]);
+                float labelHeight = wrappedStyle.CalcHeight(new GUIContent(_consoleHistory[i]), Screen.width);
+                GUI.Label(new Rect(Screen.width * 0.01f, 20 * i, Screen.width, labelHeight), _consoleHistory[i]);
             }
         }
 
