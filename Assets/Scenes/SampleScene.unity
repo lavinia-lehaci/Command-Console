@@ -387,6 +387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 548968039}
   - component: {fileID: 548968038}
+  - component: {fileID: 548968040}
   m_Layer: 0
   m_Name: Console
   m_TagString: Untagged
@@ -407,14 +408,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   commands:
-  - name: print_with_args
+  - name: print_args
     description: printing with args
     function:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 548968038}
           m_TargetAssemblyTypeName: CommandController, Assembly-CSharp
-          m_MethodName: PrintSomething
+          m_MethodName: PrintWithArgs
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -424,7 +425,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - name: print_without_args
+  - name: print
     description: printing without args
     function:
       m_PersistentCalls:
@@ -456,6 +457,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &548968040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548968037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 457a51663b394ab4a9287d53a641adc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

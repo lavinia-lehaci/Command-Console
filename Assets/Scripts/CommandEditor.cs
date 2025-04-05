@@ -24,26 +24,24 @@ public class CommandEditor : Editor
 
             for(int i = 0; i < commands.arraySize; i++)
             {
-                _itemsCollapsed[i] = EditorGUILayout.Foldout(_itemsCollapsed[i], "Command " + i);
-
                 SerializedProperty command = commands.GetArrayElementAtIndex(i);
                 SerializedProperty commandName = command.FindPropertyRelative("name");
                 SerializedProperty commandDescription = command.FindPropertyRelative("description");
                 SerializedProperty commandEvent = command.FindPropertyRelative("function");
+
+                GUILayout.BeginHorizontal();
+                _itemsCollapsed[i] = EditorGUILayout.Foldout(_itemsCollapsed[i], "Command " + i + " [" + commandName.stringValue + "]");
+                if(GUILayout.Button("Delete", GUILayout.Width(110)))
+                {
+                    commands.DeleteArrayElementAtIndex(i);
+                }  
+                GUILayout.EndHorizontal();
 
                 if(_itemsCollapsed[i])
                 {
                     EditorGUILayout.PropertyField(commandName, new GUIContent("Name"));
                     EditorGUILayout.PropertyField(commandDescription, new GUIContent("Description"));
                     EditorGUILayout.PropertyField(commandEvent, new GUIContent("Event"));
-
-                    GUILayout.BeginHorizontal();
-                    GUILayout.FlexibleSpace();
-                    if(GUILayout.Button("Delete command", GUILayout.Width(110)))
-                    {
-                        commands.DeleteArrayElementAtIndex(i);
-                    }  
-                    GUILayout.EndHorizontal();
                 }
             }
         }
@@ -53,6 +51,10 @@ public class CommandEditor : Editor
         if (GUILayout.Button("Add new command", GUILayout.Width(150)))
         {
             commands.InsertArrayElementAtIndex(commands.arraySize);
+        }
+        if (GUILayout.Button("Delete all commands", GUILayout.Width(150)))
+        {
+            commands.ClearArray();
         }
         GUILayout.FlexibleSpace(); 
         GUILayout.EndHorizontal();

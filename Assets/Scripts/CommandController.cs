@@ -6,9 +6,6 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class CommandController : MonoBehaviour
 {
-    bool displayConsole;
-    string commandInput;
-
     public List<CommandDetails> commands; 
 
     [Serializable]
@@ -19,51 +16,106 @@ public class CommandController : MonoBehaviour
         public UnityEvent<string> function;
     }
 
-    private List<Command<string>> _commandList;
+    private List<object> _commandList;
+    private List<string> _help;
+    private List<string> _consoleHistory;
 
-    public void Awake()
+    private bool _displayConsole;
+    private Vector2 _scroll;
+    private string _commandInput;
+
+    public void Start()
     {
-        _commandList = new List<Command<string>>();
+        _commandList = new List<object>();
+        _help = new List<string>();
+        _consoleHistory = new List<string>();
+
+        _consoleHistory.Add("Type 'help' to see all commands");
+        UnityEvent help = new UnityEvent();
+        help.AddListener(() => {   
+            foreach(string str in _help)
+            {
+                _consoleHistory.Add(str);
+            }} 
+        );
+        _commandList.Add(new Command("help", "display all commands", help));
+        _help.Add("help - display all commands");
+
+        UnityEvent clear = new UnityEvent();
+        clear.AddListener(() => { _consoleHistory.Clear(); });
+        _commandList.Add(new Command("clear", "clear console", clear));
+        _help.Add("clear - clear console");
+
         foreach (CommandDetails command in commands)
         {
             _commandList.Add(new Command<string>(command.name, command.description, command.function));
+            _help.Add($"{command.name} - {command.description}");
         }
     }
 
     public void Update()
     {
         if(Input.GetKeyDown(KeyCode.BackQuote))
-            displayConsole = !displayConsole;
+            _displayConsole = !_displayConsole;
     }
 
-    public void PrintSomething(string args)
+    public void PrintWithArgs(string args)
     {
         string print = "Printing with args: ";
-        foreach(string str in args.Split(' '))
+        for(int i = 1; i < args.Split(' ').Length; i++)
         {
-            print += str + " ";
+            print += args.Split(' ')[i] + " ";
         }
         Debug.Log(print);
     }
 
     public void PrintNoArgs()
     {
-        Debug.Log("Printing with no args");
+        Debug.LogWarning("Printing with no args");
+    }
+
+    public void AddLog(string str)
+    {
+        _consoleHistory.Add(str);
     }
 
     private void OnGUI()
     {
-        if(!displayConsole)
+        if(!_displayConsole)
             return;
 
-        GUI.Box(new Rect(0f, 0f, Screen.width, Screen.height * 0.05f), "");
+        float yBox = Screen.height * 0.6f;
+
+        GUI.backgroundColor = Color.black;
+        GUI.Box(new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), "");
+        
+        _scroll = GUI.BeginScrollView(
+            new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), 
+            _scroll, 
+            new Rect(0f, 0f, Screen.width * 0.9f, 20 * _consoleHistory.Count));
+
+        if(_consoleHistory.Count > 0)
+        {
+            for(int i = 0; i < _consoleHistory.Count; i++)
+            {
+                GUI.Label(new Rect(Screen.width * 0.01f, 20 * i, Screen.width * 0.8f, 20), _consoleHistory[i]);
+            }
+        }
+
+        GUI.EndScrollView();
+
+        yBox += Screen.height * 0.35f;
+        GUI.Box(new Rect(0f, yBox, Screen.width, Screen.height * 0.05f), "");
         GUI.backgroundColor = new Color(0, 0, 0, 0);
-        commandInput = GUI.TextField(new Rect(0f, 0f, Screen.width, Screen.height * 0.05f), commandInput);
+        _commandInput = GUI.TextField(new Rect(0f, yBox, Screen.width, Screen.height * 0.05f), _commandInput);
 
         if(Event.current.keyCode == KeyCode.Return)
         {
+            if(_commandInput != "")
+                _consoleHistory.Add(">> " + _commandInput);
+
             HandleCommandInput();
-            commandInput = "";
+            _commandInput = "";
         }
     }
 
@@ -71,9 +123,18 @@ public class CommandController : MonoBehaviour
     {
         for(int i = 0; i < _commandList.Count; i++)
         {
-            Command<string> command = _commandList[i];
-            if(_commandList[i] != null && commandInput.Contains(command.commandName))
-                (_commandList[i] as Command<string>).Invoke(commandInput);
+            CommandBase command = _commandList[i] as CommandBase;
+            if(_commandInput.Split(' ' )[0] == command.commandName)
+            {
+                if(command as Command != null)
+                {
+                    (command as Command).Invoke();
+                }
+                else if (command as Command<string> != null)
+                {
+                    (command as Command<string>).Invoke(_commandInput);
+                }
+            }
         }
     }
 }

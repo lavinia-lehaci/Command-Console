@@ -16,6 +16,21 @@ public class CommandBase
     }
 }
 
+public class Command : CommandBase
+{
+    private UnityEvent _function;
+
+    public Command(string name, string description, UnityEvent function) : base (name, description)
+    {
+        _function = function;
+    }
+
+    public void Invoke()
+    {
+        _function.Invoke();
+    }
+}
+
 public class Command<T> : CommandBase
 {
     private UnityEvent<T> _function;
