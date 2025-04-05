@@ -16,40 +16,39 @@ public class CommandController : MonoBehaviour
         public UnityEvent<string> function;
     }
 
-    private List<object> _commandList;
-    private List<string> _help;
-    private List<string> _consoleHistory;
-
     private bool _displayConsole;
     private Vector2 _scroll;
     private string _commandInput;
+    private const int _maxCommandHistorySize = 100;
+
+    private List<object> _commandList = new List<object>();
+    private List<string> _helpCommands = new List<string>();
+    private Queue<string> _consoleHistory = new Queue<string>();
 
     public void Start()
     {
-        _commandList = new List<object>();
-        _help = new List<string>();
-        _consoleHistory = new List<string>();
-
-        _consoleHistory.Add("Type 'help' to see all commands");
+        _consoleHistory.Enqueue("Type 'help' to see all commands.");
         UnityEvent help = new UnityEvent();
         help.AddListener(() => {   
-            foreach(string str in _help)
+            foreach(string str in _helpCommands)
             {
-                _consoleHistory.Add(str);
+                _consoleHistory.Enqueue(str);
             }} 
         );
         _commandList.Add(new Command("help", "display all commands", help));
-        _help.Add("help - display all commands");
+        _helpCommands.Add("help - display all commands");
 
         UnityEvent clear = new UnityEvent();
-        clear.AddListener(() => { _consoleHistory.Clear(); });
+        clear.AddListener(() => { 
+            _consoleHistory.Clear();
+        });
         _commandList.Add(new Command("clear", "clear console", clear));
-        _help.Add("clear - clear console");
+        _helpCommands.Add("clear - clear console");
 
         foreach (CommandDetails command in commands)
         {
             _commandList.Add(new Command<string>(command.name, command.description, command.function));
-            _help.Add($"{command.name} - {command.description}");
+            _helpCommands.Add($"{command.name} - {command.description}");
         }
     }
 
@@ -57,6 +56,9 @@ public class CommandController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.BackQuote))
             _displayConsole = !_displayConsole;
+
+        if(_consoleHistory.Count > _maxCommandHistorySize)
+            _consoleHistory.Dequeue();
     }
 
     public void PrintWithArgs(string args)
@@ -81,7 +83,7 @@ public class CommandController : MonoBehaviour
 
     public void AddLog(string str)
     {
-        _consoleHistory.Add(str);
+        _consoleHistory.Enqueue(str);
     }
 
     private void OnGUI()
@@ -93,22 +95,33 @@ public class CommandController : MonoBehaviour
 
         GUI.backgroundColor = Color.black;
         GUI.Box(new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), "");
-        
+
+        GUIStyle wrapStyle = new GUIStyle(GUI.skin.label);
+        wrapStyle.wordWrap = true; 
+        float contentHeight = 0f;
+
+        if (_consoleHistory.Count > 0)
+        {
+            foreach(string elem in _consoleHistory)
+            {
+                float labelHeight = wrapStyle.CalcHeight(new GUIContent(elem), Screen.width * 0.95f);
+                contentHeight += labelHeight;
+            }
+        }
+
         _scroll = GUI.BeginScrollView(
             new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), 
             _scroll, 
-            new Rect(0f, 0f, Screen.width * 0.9f, 20 * _consoleHistory.Count));
+            new Rect(0f, 0f, Screen.width * 0.9f, contentHeight));
 
-
-        GUIStyle wrappedStyle = new GUIStyle(GUI.skin.label);
-        wrappedStyle.wordWrap = true; 
-        
+        float yOffset = 0f;
         if(_consoleHistory.Count > 0)
         {
-            for(int i = 0; i < _consoleHistory.Count; i++)
+            foreach(string elem in _consoleHistory)
             {
-                float labelHeight = wrappedStyle.CalcHeight(new GUIContent(_consoleHistory[i]), Screen.width);
-                GUI.Label(new Rect(Screen.width * 0.01f, 20 * i, Screen.width, labelHeight), _consoleHistory[i]);
+                float labelHeight = wrapStyle.CalcHeight(new GUIContent(elem), Screen.width * 0.98f);
+                GUI.Label(new Rect(Screen.width * 0.01f, yOffset, Screen.width * 0.98f, labelHeight), elem);
+                yOffset += labelHeight;
             }
         }
 
@@ -122,10 +135,12 @@ public class CommandController : MonoBehaviour
         if(Event.current.keyCode == KeyCode.Return)
         {
             if(_commandInput != "")
-                _consoleHistory.Add(">> " + _commandInput);
+                _consoleHistory.Enqueue("> " + _commandInput);
 
             HandleCommandInput();
             _commandInput = "";
+
+            _scroll.y = float.MaxValue;
         }
     }
 
@@ -134,7 +149,7 @@ public class CommandController : MonoBehaviour
         for(int i = 0; i < _commandList.Count; i++)
         {
             CommandBase command = _commandList[i] as CommandBase;
-            if(_commandInput.Split(' ' )[0] == command.commandName)
+            if(_commandInput.Split(' ')[0] == command.commandName)
             {
                 if(command as Command != null)
                 {
