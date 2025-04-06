@@ -1,47 +1,50 @@
 using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// Custom editor for the CommandController class.
+/// </summary>
 [CustomEditor(typeof(CommandController))]
 [CanEditMultipleObjects]
 public class CommandEditor : Editor
 {
-    SerializedProperty commands;
-    private bool[] _itemsCollapsed;
+    public SerializedProperty CommandList;
+    private bool[] _shouldCommandsCollapse; 
     
     void OnEnable()
     {
-        commands = serializedObject.FindProperty("commands");
+        CommandList = serializedObject.FindProperty("Commands");
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        if(commands != null && commands.isArray)
+        if(CommandList != null && CommandList.isArray)
         {
-            if(_itemsCollapsed == null || _itemsCollapsed.Length != commands.arraySize)
-                _itemsCollapsed = new bool[commands.arraySize];
-
-            for(int i = 0; i < commands.arraySize; i++)
+            if(_shouldCommandsCollapse == null || _shouldCommandsCollapse.Length != CommandList.arraySize)
+                _shouldCommandsCollapse = new bool[CommandList.arraySize];
+            
+            for(int i = 0; i < CommandList.arraySize; i++)
             {
-                SerializedProperty command = commands.GetArrayElementAtIndex(i);
-                SerializedProperty commandName = command.FindPropertyRelative("name");
-                SerializedProperty commandDescription = command.FindPropertyRelative("description");
-                SerializedProperty commandEvent = command.FindPropertyRelative("function");
+                SerializedProperty command = CommandList.GetArrayElementAtIndex(i);
+                SerializedProperty commandName = command.FindPropertyRelative("Name");
+                SerializedProperty commandDescription = command.FindPropertyRelative("Description");
+                SerializedProperty commandFunction = command.FindPropertyRelative("Function");
 
                 GUILayout.BeginHorizontal();
-                _itemsCollapsed[i] = EditorGUILayout.Foldout(_itemsCollapsed[i], "Command " + i + " [" + commandName.stringValue + "]");
+                _shouldCommandsCollapse[i] = EditorGUILayout.Foldout(_shouldCommandsCollapse[i], "Command " + i + " [" + commandName.stringValue + "]");
                 if(GUILayout.Button("Delete", GUILayout.Width(110)))
                 {
-                    commands.DeleteArrayElementAtIndex(i);
+                    CommandList.DeleteArrayElementAtIndex(i);
                 }  
                 GUILayout.EndHorizontal();
 
-                if(_itemsCollapsed[i])
+                if(_shouldCommandsCollapse[i])
                 {
                     EditorGUILayout.PropertyField(commandName, new GUIContent("Name"));
                     EditorGUILayout.PropertyField(commandDescription, new GUIContent("Description"));
-                    EditorGUILayout.PropertyField(commandEvent, new GUIContent("Event"));
+                    EditorGUILayout.PropertyField(commandFunction, new GUIContent("Function"));
                 }
             }
         }
@@ -50,11 +53,11 @@ public class CommandEditor : Editor
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Add new command", GUILayout.Width(150)))
         {
-            commands.InsertArrayElementAtIndex(commands.arraySize);
+            CommandList.InsertArrayElementAtIndex(CommandList.arraySize);
         }
         if (GUILayout.Button("Delete all commands", GUILayout.Width(150)))
         {
-            commands.ClearArray();
+            CommandList.ClearArray();
         }
         GUILayout.FlexibleSpace(); 
         GUILayout.EndHorizontal();

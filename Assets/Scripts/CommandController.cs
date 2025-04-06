@@ -4,23 +4,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+/// <summary>
+/// Class that controls the logic of the command console.
+/// </summary>
 [ExecuteInEditMode]
 public class CommandController : MonoBehaviour
 {
-    public List<CommandDetails> commands; 
-
+    /// <summary>
+    /// Commands set in the Unity Inspector.
+    /// </summary>
+    public List<CommandDetails> Commands; 
     [Serializable]
     public struct CommandDetails
     {
-        public string name;
-        public string description;
-        public UnityEvent<string> function;
+        public string Name;
+        public string Description;
+        public UnityEvent<string> Function;
     }
 
-    private bool _displayConsole;
-    private Vector2 _scroll;
-    private string _commandInput;
-    private const int _maxCommandConsoleSize = 100;
+    private bool _isConsoleVisible;
+    private Vector2 _scrollPosition;
+    private string _input;
+    private const int _maxCommandSize = 100;    // Maximum commands stored in the console history.
 
     private List<object> _commandList = new List<object>();
     private Queue<string> _consoleHistory = new Queue<string>();
@@ -38,15 +43,23 @@ public class CommandController : MonoBehaviour
     public void Update()
     {
         if(Input.GetKeyDown(KeyCode.BackQuote))
-            _displayConsole = !_displayConsole;
+            _isConsoleVisible = !_isConsoleVisible;
 
-        if(_consoleHistory.Count > _maxCommandConsoleSize)
+        // If the limit is exceeded, the oldest command is deleted from the console history.
+        if(_consoleHistory.Count > _maxCommandSize)
             _consoleHistory.Dequeue();
 
+        // Print the default help message if the console history is empty.
         if(_consoleHistory.Count == 0)
             _consoleHistory.Enqueue("Type 'help' to see all commands.");
     }
 
+    /// <summary>
+    /// Registers a predefined set of commands.
+    /// - 'help' displays a list of all commands and their descriptions.
+    /// - 'clear' clears the console screen. It does not delete the console history.
+    /// - 'save_logs' saves the console history to a file.
+    /// </summary>
     private void RegisterDefaultCommands()
     {
         UnityEvent showHelpEvent = new UnityEvent();
@@ -54,12 +67,11 @@ public class CommandController : MonoBehaviour
             for(int i = 0; i < _commandList.Count; i++)
             {
                 CommandBase command = _commandList[i] as CommandBase;
-                string str = $"{command.commandName} - {command.commandDescription}";
+                string str = $"{command.CommandName} - {command.CommandDescription}";
                 _consoleHistory.Enqueue(str);
                 _logs.Enqueue(str);
             }
-            } 
-        );
+        });
         Command showHelpCommand = new Command("help", "display all commands", showHelpEvent);
         _commandList.Add(showHelpCommand);
 
@@ -74,14 +86,21 @@ public class CommandController : MonoBehaviour
         _commandList.Add(saveLogsCommand);
     }
 
+    /// <summary>
+    /// Adds the commands set in the Unity Inspector to the command list.
+    /// </summary>
     private void AddCommandsFromInspector()
     {
-        foreach (CommandDetails command in commands)
+        foreach (CommandDetails command in Commands)
         {
-            _commandList.Add(new Command<string>(command.name, command.description, command.function));
+            _commandList.Add(new Command<string>(command.Name, command.Description, command.Function));
         }
     }
 
+    /// <summary>
+    /// Writes the current console history to a file.
+    /// <param name="args">String that contains multiple arguments. When parsed, it contains the file name.</param>
+    /// </summary>
     public void WriteLogsToFile(string args)
     {
         string folderPath = "Assets/Logs";    
@@ -119,26 +138,34 @@ public class CommandController : MonoBehaviour
         }
     }
 
-    public void AddLog(string str)
+    /// <summary>
+    /// Called by the SubscribeToUnityLogs class when a log message is received.
+    /// Adds the log message to the console, as well as the list used to save the logs. 
+    /// <param name="log">Log message</param>
+    /// </summary>
+    public void AddLog(string log)
     {
-        _consoleHistory.Enqueue(str);
-        _logs.Enqueue(str);
+        _consoleHistory.Enqueue(log);
+        _logs.Enqueue(log);
     }
 
+    /// <summary>
+    /// Renders and handles GUI events.
+    /// </summary>
     private void OnGUI()
     {
-        if(!_displayConsole)
+        if(!_isConsoleVisible)
             return;
 
+        // Create the console box.
         float yBox = Screen.height * 0.6f;
-
         GUI.backgroundColor = Color.black;
         GUI.Box(new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), "");
 
+        // Calculate the height of the scrolling area's viewport based on the height of the console text.
         GUIStyle wrapStyle = new GUIStyle(GUI.skin.label);
         wrapStyle.wordWrap = true; 
         float contentHeight = 0f;
-
         if (_consoleHistory.Count > 0)
         {
             foreach(string elem in _consoleHistory)
@@ -148,11 +175,13 @@ public class CommandController : MonoBehaviour
             }
         }
 
-        _scroll = GUI.BeginScrollView(
+        // Create a scrolling area.
+        _scrollPosition = GUI.BeginScrollView(
             new Rect(0f, yBox, Screen.width, Screen.height * 0.35f), 
-            _scroll, 
+            _scrollPosition, 
             new Rect(0f, 0f, Screen.width * 0.9f, contentHeight));
 
+        // Display the console text. 
         float yOffset = 0f;
         if(_consoleHistory.Count > 0)
         {
@@ -174,34 +203,38 @@ public class CommandController : MonoBehaviour
                 yOffset += labelHeight;
             }
         }
-
         GUI.EndScrollView();
 
+        // Create the input field.
         yBox += Screen.height * 0.35f;
         GUI.Box(new Rect(0f, yBox, Screen.width, Screen.height * 0.05f), "");
         GUI.backgroundColor = new Color(0, 0, 0, 0);
-        _commandInput = GUI.TextField(new Rect(0f, yBox, Screen.width, Screen.height * 0.05f), _commandInput);
+        _input = GUI.TextField(new Rect(0f, yBox, Screen.width, Screen.height * 0.05f), _input);
 
+        // Handle input.
         if(Event.current.keyCode == KeyCode.Return)
         {
-            if(String.IsNullOrEmpty(_commandInput))
+            if(String.IsNullOrEmpty(_input))
                 return;
 
-            _consoleHistory.Enqueue("> " + _commandInput);
-            _logs.Enqueue($"> {_commandInput}");
+            _consoleHistory.Enqueue("> " + _input);
+            _logs.Enqueue($"> {_input}");
             
             HandleCommandInput();
-            _commandInput = "";
-            _scroll.y = float.MaxValue;
+            _input = "";
+            _scrollPosition.y = float.MaxValue; // Scroll down to the last element added to the console.
         }
     }
 
+    /// <summary>
+    /// Processes the input based on the type of command inserted.
+    /// </summary>
     private void HandleCommandInput()
     {
         for(int i = 0; i < _commandList.Count; i++)
         {
             CommandBase command = _commandList[i] as CommandBase;
-            if(_commandInput.Split(' ')[0] == command.commandName)
+            if(_input.Split(' ')[0] == command.CommandName)
             {
                 if(command as Command != null)
                 {
@@ -209,13 +242,13 @@ public class CommandController : MonoBehaviour
                 }
                 else if (command as Command<string> != null)
                 {
-                    (command as Command<string>).Invoke(_commandInput);
+                    (command as Command<string>).Invoke(_input);
                 }
             }
         }
     }
 
-    // Testing commands
+    #region Testing commands
     public void PrintWithArgs(string args)
     {
         string print = "";
@@ -236,4 +269,5 @@ public class CommandController : MonoBehaviour
     {
         Debug.LogWarning($"A warning assigned to this transform! {transform}");
     }
+    #endregion
 }

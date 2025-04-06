@@ -407,10 +407,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f4877abd132bf4087429743661b447, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  commands:
-  - name: print_args
-    description: printing with args
-    function:
+  Commands:
+  - Name: print_args
+    Description: print with args
+    Function:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 548968038}
@@ -425,9 +425,9 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - name: print
-    description: printing without args
-    function:
+  - Name: print
+    Description: print without args
+    Function:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 548968038}
@@ -442,9 +442,9 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - name: print_warning
-    description: printing a waning
-    function:
+  - Name: print_warning
+    Description: print a waning
+    Function:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 548968038}
