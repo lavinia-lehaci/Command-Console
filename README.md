@@ -1,5 +1,5 @@
 # Command-Console
-Unity console that allows the user to input commands for debugging purposes. It can be also used as a "cheat" console.
+Unity console that allows the user to input commands for debugging purposes. It can be also used as a "cheat" console in games.
 
 <figure>
   <img
@@ -11,9 +11,9 @@ This project uses Unity's IMGUI feature to display the console. When the scene i
 
 The main logic lies in the ``CommandController`` script. It defines a set of default commands (``help``, ``clear``, ``save_logs``), and allows creating new commands through the ``CommandDetails`` struct. This is shown in the Inspector, where each command requires a name (which is the text to be inputted in the console to perform the command's event), a description, and an UnityEvent. The event needs to exist in a script that is attached to a GameObject, otherwise it will not be visible in the Inspector.
 
-- ``help`` - displays all commands, including the default ones set in the script and the ones created in the Inspector.
-- ``clear`` - clears the console without deleting its history.
-- ``save_logs`` - saves the console history to a file; any text after the command will be parsed as the filename, but if none is given, the new file will use the default "output" name.
+- ``help`` - Displays all commands, including the default ones set in the script and the ones created in the Inspector.
+- ``clear`` - Clears the console without deleting its history.
+- ``save_logs`` - Saves the console history to a file. Any text after the command will be parsed as the filename, but if none is given, the new file will use the default "output" name. Log files will be saved under ``Assets/Log``.
 
 There is a custom editor for the main script, called ``CommandEditor`` which displays the list of existing commands, along with buttons to create or delete commands.
 
@@ -36,9 +36,9 @@ Clone the repository:
 Run the project:
 - Open the Unity project and the sample scene. The ``Console`` GameObject has the necessary scripts attached to it.
     - Alternatively, create an empty Game Object and attach the ``CommandController`` script to it. That will also allow the custom editor to be displayed.
-    - If you want to receive log messages from Unity, attach also the ``SubscribeToUnityLogs`` script. 
+    - If you want to receive log messages from Unity, attach the ``SubscribeToUnityLogs`` script. 
 - Add your own custom commands in the Inspector.
-- Click Play to run the scene. Type `` ` `` to display the console and input any of the set commands.
+- Click Play to run the scene. Type `` ` `` to display the console and type any command.
 
 ## References
 [This video](https://www.youtube.com/watch?v=VzOEM-4A2OM) from Game Dev Guide served as inspiration in the early stages.
