@@ -38,7 +38,7 @@ Run the project:
     - Alternatively, create an empty Game Object and attach the ``CommandController`` script to it. That will also allow the custom editor to be displayed.
     - If you want to receive log messages from Unity, attach the ``SubscribeToUnityLogs`` script. 
 - Add your own custom commands in the Inspector.
-- Click Play to run the scene. Click `` ` `` to display the console and type any command.
+- Click **Play** to run the scene, then `` ` `` to display the console and type any command.
 
 ## References
 [This video](https://www.youtube.com/watch?v=VzOEM-4A2OM) from Game Dev Guide served as inspiration in the early stages.
