@@ -251,7 +251,7 @@ public class CommandController : MonoBehaviour
     #region Testing commands
     public void PrintWithArgs(string args)
     {
-        string print = "";
+        string print = "Args: ";
         string[] argsArray = args.Split(' ');
         for(int i = 1; i < argsArray.Length; i++)
         {
@@ -267,7 +267,7 @@ public class CommandController : MonoBehaviour
 
     public void PrintWarning()
     {
-        Debug.LogWarning($"A warning assigned to this transform! {transform}");
+        Debug.LogWarning($"This is a warning!");
     }
     #endregion
 }
