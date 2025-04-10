@@ -1,5 +1,5 @@
 # Command-Console
-Unity console that allows the user to input commands for debugging purposes. It can be also used as a "cheat" console in games.
+Unity console that allows inputting commands at runtime for debugging purposes. It can be also used as a "cheat" console in games.
 
 <figure>
   <img
