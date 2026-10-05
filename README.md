@@ -1,5 +1,5 @@
 # Command-Console
-Unity console that allows inputting commands at runtime for debugging purposes. It can be also used as a "cheat" console in games.
+A runtime command console for Unity, built with IMGUI, useful for debugging or as an in-game "cheat console".
 
 <figure>
   <img
@@ -7,41 +7,78 @@ Unity console that allows inputting commands at runtime for debugging purposes. 
   alt="Console">
 </figure>
 
-This project uses Unity's IMGUI feature to display the console. When the scene is running, the console can be displayed by pressing the `` ` `` key. Clicking it again will hide the console.
+## Features
 
-The main logic lies in the ``CommandController`` script. It defines a set of default commands (``help``, ``clear``, ``save_logs``), and allows creating new commands through the ``CommandDetails`` struct. This is shown in the Inspector, where each command requires a name (which is the text to be inputted in the console to perform the command's event), a description, and an UnityEvent. The event needs to exist in a script that is attached to a GameObject, otherwise it will not be visible in the Inspector.
-
-- ``help`` - Displays all commands, including the default ones set in the script and the ones created in the Inspector.
-- ``clear`` - Clears the console without deleting its history.
-- ``save_logs`` - Saves the console history to a file. Any text after the command will be parsed as the filename, but if none is given, the new file will use the default "output" name. Log files will be saved under ``Assets/Log``.
-
-There is a custom editor for the main script, called ``CommandEditor`` which displays the list of existing commands, along with buttons to create or delete commands.
-
-<p align="center">
-  <img
-  src="Images/editor.png"
-  width="50%"
-  alt="editor">
-</p>
-
-The ``Command`` script defines a base class and two derived classes. ``Command`` is used for methods that have no arguments, while methods that require arguments will use ``Command<T>`` instances. Currently, the only parameter type processed by the main class is ``string``. This implies further processing inside each invoked method.
-
-The ``SubscribeToUnityLogs`` script ensures that any messages received from Unity (warnings, errors, general log information) are shown in the console. They are displayed in the following format: ``dd-MMM-yyyy HH:mm:ss [log type] [log message]``. A stack trace is also provided if the log type is error.
+- Toggleable runtime console (`` ` `` key) built with Unity's IMGUI
+- Default commands: `help`, `clear`, `save_logs`
+- Custom commands configurable entirely from the Inspector
+- Custom Inspector editor for adding/removing commands
+- Captures Unity's own log messages (warnings, errors, info) directly into the console, with stack traces on errors
 
 ## Getting started
-Clone the repository:
+**Requirements:** Unity 6, URP
 
+1. Clone the repository: 
 ```git clone https://github.com/lavinia-lehaci/Command-Console.git```
 
-Run the project:
-- Open the Unity project and the sample scene. The ``Console`` GameObject has the necessary scripts attached to it.
-    - Alternatively, create an empty Game Object and attach the ``CommandController`` script to it. That will also allow the custom editor to be displayed.
-    - If you want to receive log messages from Unity, attach the ``SubscribeToUnityLogs`` script. 
-- Add your own custom commands in the Inspector.
-- Click **Play** to run the scene, then `` ` `` to display the console and type any command.
+2. Open the project and load the sample scene. The `Console` GameObject already has the required scripts attached.
+   - Or, in your own scene: create an empty GameObject and attach the `CommandController` script (this also enables the custom Inspector editor). Attach `SubscribeToUnityLogs` too if you want Unity's own log messages to appear in the console.
+3. Press Play, then `` ` `` to open the console and try a command (e.g. `help`).
+ 
+## Default commands
+
+| Command | Description |
+|---|---|
+| `help` | Lists all available commands, both built-in and ones defined in the Inspector |
+| `clear` | Clears the visible console, without affecting its history |
+| `save_logs` | Saves the console history to a file under `Assets/Log`. Any text after the command is used as the filename; defaults to `output` if none is given |
+
+## Adding custom commands
+
+<table>
+<tr>
+<td width="50%">
+
+New commands are added from the Inspector via a `CommandDetails` struct, with no need to modify the console's code directly.
+
+Each command needs:
+- **Name** — the text typed in the console to trigger it
+- **Description** — to be shown when `help` is called
+- **Event** — a `UnityEvent`, which must point to a method on a script already attached to a GameObject in the scene (events not attached to the scene won't appear as assignable)
+
+A custom Inspector editor (`CommandEditor`) lists existing commands and provides buttons to add or remove them.
+
+</td>
+<td width="50%">
+
+  <img
+  src="Images/editor.png"
+  alt="editor">
+
+</td>
+</tr>
+</table>
+
+## Known limitations
+
+The console only parses `string` arguments; any command needing another type (numbers, bools, etc.) has to convert and validate the string itself inside the invoked method.
+
+## How it works
+
+The core logic lives in the `CommandController` script, which defines the default commands (`help`, `clear`, `save_logs`) and exposes custom commands through the `CommandDetails` struct shown in the Inspector.
+
+The `Command` script defines a base class for commands with no arguments, and a generic `Command<T>` for commands that take one. Currently `T` is only used as `string`, so any further parsing (to a number, bool, etc.) happens inside the invoked method itself.
+
+`SubscribeToUnityLogs` hooks into Unity's own logging system, so any warning, error, or info message Unity produces is also shown in the console, formatted as `dd-MMM-yyyy HH:mm:ss [log type] [log message]`, with a stack trace attached for errors.
+
+## What I'd add next
+
+- Typed command arguments (numbers, booleans, etc.) instead of leaving all parsing to each command
+- Command history and autocomplete, e.g. pressing up-arrow to recall the last command
 
 ## References
-[This video](https://www.youtube.com/watch?v=VzOEM-4A2OM) from Game Dev Guide served as inspiration in the early stages.
+
+- [Creating a Cheat Console in Unity by Game Dev Guide](https://www.youtube.com/watch?v=VzOEM-4A2OM), used as early inspiration
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
